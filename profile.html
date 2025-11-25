@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Child Profile - Health Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Copy of Shared CSS */
+    :root { --bg-gradient: radial-gradient(circle at top left, #2f4369 0, #1f2933 35%, #111827 100%); --primary: #6366f1; --primary-soft: rgba(99, 102, 241, 0.16); --primary-strong: #4f46e5; --accent: #f97316; --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; --card-bg: rgba(15, 23, 42, 0.82); --card-hover: rgba(30, 41, 59, 0.9); --border-subtle: rgba(148, 163, 184, 0.15); --text-main: #e5e7eb; --text-muted: #9ca3af; --text-soft: #6b7280; --glass-shadow: 0 24px 60px rgba(0, 0, 0, 0.5); --radius-xl: 18px; --radius-lg: 14px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; min-height: 100vh; background: var(--bg-gradient); color: var(--text-main); overflow-x: hidden; }
+    .app-shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    @media (max-width: 900px) { .app-shell { grid-template-columns: 1fr; } }
+    .sidebar { position: sticky; top: 0; height: 100vh; padding: 20px 18px; border-right: 1px solid var(--border-subtle); background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); z-index: 50; overflow-y: auto; }
+    .sidebar-header { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; padding: 0 8px; }
+    .logo-badge { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--primary)); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+    .nav-links { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .nav-links li a { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500; transition: all 0.2s ease; border: 1px solid transparent; }
+    .nav-links li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
+    .nav-links li a.active { background: var(--primary-soft); color: #fff; border-color: rgba(99, 102, 241, 0.3); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; width: 100%; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .page-title h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+    .page-subtitle { font-size: 14px; color: var(--text-muted); }
+    .card { background: var(--card-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 24px; backdrop-filter: blur(24px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 24px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px; }
+    .card-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    @media (max-width: 1100px) { .grid-2 { grid-template-columns: 1fr; } }
+    .status-pill { padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .status-done { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .status-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 99px; border: none; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.2s; text-decoration: none; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-strong)); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4); }
+    .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    .btn-outline { background: transparent; border: 1px solid var(--border-subtle); color: var(--text-main); }
+    .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: var(--text-muted); }
+    .timeline-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid var(--border-subtle); transition: 0.2s; }
+    .timeline-item:last-child { border-bottom: none; }
+
+    /* Specific: ID Card */
+    .virtual-id-card { background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 16px; padding: 24px; color: white; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); }
+    .virtual-id-card::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%); }
+    .id-header { display: flex; justify-content: space-between; margin-bottom: 24px; opacity: 0.9; }
+    .id-user { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+    .id-photo { width: 64px; height: 64px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid rgba(255,255,255,0.4); }
+    .id-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px; }
+    .id-field-label { opacity: 0.7; font-size: 11px; text-transform: uppercase; }
+
+    .mobile-toggle { display: none; font-size: 24px; background: none; border: none; color: white; cursor: pointer; }
+    @media (max-width: 900px) { .mobile-toggle { display: block; margin-right: 16px; } .sidebar { position: fixed; transform: translateX(-100%); width: 280px; transition: 0.3s; } .sidebar.open { transform: translateX(0); } .page-header { flex-direction: column; align-items: flex-start; gap: 16px; } }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-badge">H</div>
+        <div>
+          <div style="font-weight: 600; color: #fff;">Health Tracker</div>
+          <div style="font-size: 11px; color: var(--text-soft);">Child Care Portal</div>
+        </div>
+      </div>
+      <ul class="nav-links">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a></li>
+        <li><a href="vaccinations.html"><span class="nav-icon">💉</span> Vaccinations</a></li>
+        <li><a href="appointments.html"><span class="nav-icon">📅</span> Appointments</a></li>
+        <li><a href="profile.html" class="active"><span class="nav-icon">🪪</span> Child Profile</a></li>
+        <li><a href="history.html"><span class="nav-icon">📋</span> Medical History</a></li>
+        <li><a href="diet.html"><span class="nav-icon">🍎</span> Diet & Nutrition</a></li>
+      </ul>
+    </aside>
+
+    <main class="main">
+      <header class="page-header">
+        <div style="display: flex; align-items: center;">
+          <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="page-title">
+            <h1>Child Profile</h1>
+            <div class="page-subtitle">Digital Identity and Documents</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button class="btn btn-outline">🔔</button>
+          <div style="width:36px; height:36px; border-radius:50%; background: linear-gradient(135deg, #f97316, #ec4899); display:flex; align-items:center; justify-content:center; font-weight:bold; color:white;">R</div>
+        </div>
+      </header>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Digital Identity</div></div>
+          
+          <div class="virtual-id-card">
+            <div class="id-header">
+              <div style="font-weight:700;">HEALTH ID</div>
+              <div style="font-family:monospace; opacity:0.8;">HID-2025-7891</div>
+            </div>
+            <div class="id-user">
+              <div class="id-photo">👤</div>
+              <div>
+                <div style="font-size:20px; font-weight:700;">Rujul</div>
+                <div style="opacity:0.9;">DOB: Aug 08, 2024</div>
+              </div>
+            </div>
+            <div class="id-grid">
+              <div>
+                <div class="id-field-label">Guardian</div>
+                <div>Emily Johnson</div>
+              </div>
+              <div>
+                <div class="id-field-label">Blood Type</div>
+                <div>O+</div>
+              </div>
+              <div>
+                <div class="id-field-label">Emergency</div>
+                <div>987-436-8776</div>
+              </div>
+              <div>
+                <div class="id-field-label">Allergies</div>
+                <div>Peanuts</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; margin-top:20px;">
+            <button class="btn btn-primary" style="flex:1; justify-content:center;">Edit Profile</button>
+            <button class="btn btn-outline" style="flex:1; justify-content:center;">Share ID</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Linked Documents</div></div>
+          <div class="timeline-item">
+            <div>
+              <div style="font-weight:600;">Vaccination Certificate</div>
+              <div style="font-size:12px; color:var(--text-muted);">Health Record</div>
+            </div>
+            <span class="status-pill status-done">Verified</span>
+          </div>
+          <div class="timeline-item">
+            <div>
+              <div style="font-weight:600;">Birth Certificate</div>
+              <div style="font-size:12px; color:var(--text-muted);">Legal Document</div>
+            </div>
+            <span class="status-pill status-done">Verified</span>
+          </div>
+          <div class="timeline-item">
+            <div>
+              <div style="font-weight:600;">Health Insurance</div>
+              <div style="font-size:12px; color:var(--text-muted);">Insurance Record</div>
+            </div>
+            <span class="status-pill status-pending">Pending</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

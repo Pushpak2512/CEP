@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diet - Child Health Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Copy of Shared CSS */
+    :root { --bg-gradient: radial-gradient(circle at top left, #2f4369 0, #1f2933 35%, #111827 100%); --primary: #6366f1; --primary-soft: rgba(99, 102, 241, 0.16); --primary-strong: #4f46e5; --accent: #f97316; --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; --card-bg: rgba(15, 23, 42, 0.82); --card-hover: rgba(30, 41, 59, 0.9); --border-subtle: rgba(148, 163, 184, 0.15); --text-main: #e5e7eb; --text-muted: #9ca3af; --text-soft: #6b7280; --glass-shadow: 0 24px 60px rgba(0, 0, 0, 0.5); --radius-xl: 18px; --radius-lg: 14px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; min-height: 100vh; background: var(--bg-gradient); color: var(--text-main); overflow-x: hidden; }
+    .app-shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    @media (max-width: 900px) { .app-shell { grid-template-columns: 1fr; } }
+    .sidebar { position: sticky; top: 0; height: 100vh; padding: 20px 18px; border-right: 1px solid var(--border-subtle); background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); z-index: 50; overflow-y: auto; }
+    .sidebar-header { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; padding: 0 8px; }
+    .logo-badge { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--primary)); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+    .nav-links { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .nav-links li a { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500; transition: all 0.2s ease; border: 1px solid transparent; }
+    .nav-links li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
+    .nav-links li a.active { background: var(--primary-soft); color: #fff; border-color: rgba(99, 102, 241, 0.3); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; width: 100%; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .page-title h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+    .page-subtitle { font-size: 14px; color: var(--text-muted); }
+    .card { background: var(--card-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 24px; backdrop-filter: blur(24px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 24px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px; }
+    .card-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    @media (max-width: 1100px) { .grid-2 { grid-template-columns: 1fr; } }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid var(--border-subtle); }
+    .stat-value { font-size: 24px; font-weight: 700; color: var(--text-main); margin: 8px 0; }
+    .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 99px; border: none; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.2s; text-decoration: none; }
+    .btn-outline { background: transparent; border: 1px solid var(--border-subtle); color: var(--text-main); }
+    .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: var(--text-muted); }
+    .status-pill { padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .status-done { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .status-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-overdue { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* Specific: Diet */
+    .water-tracker { display: flex; gap: 12px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+    .glass { width: 36px; height: 50px; border: 2px solid #3b82f6; border-radius: 0 0 12px 12px; position: relative; cursor: pointer; transition: 0.3s; opacity: 0.5; }
+    .glass.filled { background: linear-gradient(to top, #3b82f6 0%, #60a5fa 100%); opacity: 1; }
+    .meal-card { background: rgba(255,255,255,0.03); border-left: 3px solid var(--primary); padding: 16px; border-radius: 8px; margin-bottom: 12px; }
+
+    .mobile-toggle { display: none; font-size: 24px; background: none; border: none; color: white; cursor: pointer; }
+    @media (max-width: 900px) { .mobile-toggle { display: block; margin-right: 16px; } .sidebar { position: fixed; transform: translateX(-100%); width: 280px; transition: 0.3s; } .sidebar.open { transform: translateX(0); } .page-header { flex-direction: column; align-items: flex-start; gap: 16px; } }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-badge">H</div>
+        <div>
+          <div style="font-weight: 600; color: #fff;">Health Tracker</div>
+          <div style="font-size: 11px; color: var(--text-soft);">Child Care Portal</div>
+        </div>
+      </div>
+      <ul class="nav-links">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a></li>
+        <li><a href="vaccinations.html"><span class="nav-icon">💉</span> Vaccinations</a></li>
+        <li><a href="appointments.html"><span class="nav-icon">📅</span> Appointments</a></li>
+        <li><a href="profile.html"><span class="nav-icon">🪪</span> Child Profile</a></li>
+        <li><a href="history.html"><span class="nav-icon">📋</span> Medical History</a></li>
+        <li><a href="diet.html" class="active"><span class="nav-icon">🍎</span> Diet & Nutrition</a></li>
+      </ul>
+    </aside>
+
+    <main class="main">
+      <header class="page-header">
+        <div style="display: flex; align-items: center;">
+          <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="page-title">
+            <h1>Diet & Nutrition</h1>
+            <div class="page-subtitle">Meal Planning and Tracking</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button class="btn btn-outline">🔔</button>
+          <div style="width:36px; height:36px; border-radius:50%; background: linear-gradient(135deg, #f97316, #ec4899); display:flex; align-items:center; justify-content:center; font-weight:bold; color:white;">R</div>
+        </div>
+      </header>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-value" style="color:#f87171">1,850</div><div class="stat-label">Calories</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#3b82f6">6</div><div class="stat-label">Water (Glasses)</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:#a855f7">85%</div><div class="stat-label">Nutrients</div></div>
+      </div>
+
+      <div class="card" style="text-align:center;">
+        <div class="card-header" style="justify-content:center; border:none;"><div class="card-title">Daily Water Intake</div></div>
+        <div class="water-tracker">
+          <div class="glass filled" onclick="this.classList.toggle('filled')"></div>
+          <div class="glass filled" onclick="this.classList.toggle('filled')"></div>
+          <div class="glass filled" onclick="this.classList.toggle('filled')"></div>
+          <div class="glass filled" onclick="this.classList.toggle('filled')"></div>
+          <div class="glass filled" onclick="this.classList.toggle('filled')"></div>
+          <div class="glass filled" onclick="this.classList.toggle('filled')"></div>
+          <div class="glass" onclick="this.classList.toggle('filled')"></div>
+          <div class="glass" onclick="this.classList.toggle('filled')"></div>
+        </div>
+        <p style="font-size:12px; color:var(--text-muted);">Target: 8 Glasses • Click to toggle</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Today's Meals</div></div>
+          
+          <div class="meal-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <div style="font-weight:600;">Breakfast (7:00 AM)</div>
+              <div style="font-size:12px; color:var(--text-muted);">420 kcal</div>
+            </div>
+            <div style="font-size:13px; color:var(--text-muted);">Oatmeal with berries, honey, walnuts. Greek yogurt.</div>
+          </div>
+
+          <div class="meal-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <div style="font-weight:600;">Lunch (1:00 PM)</div>
+              <div style="font-size:12px; color:var(--text-muted);">520 kcal</div>
+            </div>
+            <div style="font-size:13px; color:var(--text-muted);">Grilled chicken salad, quinoa, olive oil dressing.</div>
+          </div>
+
+          <div class="meal-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <div style="font-weight:600;">Dinner (7:30 PM)</div>
+              <div style="font-size:12px; color:var(--text-muted);">580 kcal</div>
+            </div>
+            <div style="font-size:13px; color:var(--text-muted);">Baked salmon, steamed broccoli, sweet potato.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Food Guide</div></div>
+          
+          <div style="margin-bottom:20px;">
+            <div style="font-weight:600; color:#f87171; margin-bottom:8px;">🚫 Avoid (Allergies)</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              <span class="status-pill status-overdue">Peanuts</span>
+              <span class="status-pill status-overdue">Shellfish</span>
+              <span class="status-pill status-overdue">Dairy</span>
+            </div>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <div style="font-weight:600; color:#4ade80; margin-bottom:8px;">✅ Recommended</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              <span class="status-pill status-done">Leafy Greens</span>
+              <span class="status-pill status-done">Berries</span>
+              <span class="status-pill status-done">Avocado</span>
+              <span class="status-pill status-done">Fatty Fish</span>
+            </div>
+          </div>
+          
+          <div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:8px;">
+            <div style="font-weight:600; font-size:13px; margin-bottom:4px;">Weekly Focus: High Protein</div>
+            <div style="font-size:12px; color:var(--text-muted);">Focus on lean meats, legumes, and nuts this week to support growth.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
